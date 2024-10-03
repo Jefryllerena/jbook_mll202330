@@ -437,11 +437,384 @@ For example, here’s some sample Matplotlib code:</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;contextlib.ExitStack at 0x176b62f25e0&gt;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;contextlib.ExitStack at 0x1e76e773790&gt;
 </pre></div>
 </div>
 </div>
 </div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_absolute_error</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
+<span class="kn">from</span> <span class="nn">statsmodels.tsa.stattools</span> <span class="kn">import</span> <span class="n">adfuller</span>
+<span class="kn">from</span> <span class="nn">statsmodels.tsa.stattools</span> <span class="kn">import</span> <span class="n">acf</span><span class="p">,</span> <span class="n">pacf</span>
+<span class="kn">from</span> <span class="nn">statsmodels.tsa.arima_model</span> <span class="kn">import</span> <span class="n">ARIMA</span> <span class="k">as</span> <span class="n">ARIMA</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+<span class="kn">import</span> <span class="nn">statsmodels.tsa.api</span> <span class="k">as</span> <span class="nn">smt</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">float_format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{:.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;C:/Users/Maestriadatos/Documents/jbook_mll202330/docs/avocado.csv&quot;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;Unnamed: 0&#39;</span><span class="p">,</span><span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="n">df1</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">df1</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df1</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">])</span>
+<span class="n">df1</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Date&#39;</span><span class="p">,</span><span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">df1</span> <span class="o">=</span> <span class="n">df1</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;W&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">df1</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>AveragePrice</th>
+      <th>Total Volume</th>
+      <th>4046</th>
+      <th>4225</th>
+      <th>4770</th>
+      <th>Total Bags</th>
+      <th>Small Bags</th>
+      <th>Large Bags</th>
+      <th>XLarge Bags</th>
+      <th>type</th>
+      <th>year</th>
+      <th>region</th>
+    </tr>
+    <tr>
+      <th>Date</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2015-01-04</th>
+      <td>140.54</td>
+      <td>84674337.20</td>
+      <td>33098258.74</td>
+      <td>36851038.43</td>
+      <td>2278818.64</td>
+      <td>12446221.39</td>
+      <td>9910008.90</td>
+      <td>2485655.90</td>
+      <td>50556.59</td>
+      <td>conventionalconventionalconventionalconvention...</td>
+      <td>217620</td>
+      <td>AlbanyAtlantaBaltimoreWashingtonBoiseBostonBuf...</td>
+    </tr>
+    <tr>
+      <th>2015-01-11</th>
+      <td>148.03</td>
+      <td>78555807.24</td>
+      <td>31024164.99</td>
+      <td>32808429.84</td>
+      <td>2349167.45</td>
+      <td>12374044.96</td>
+      <td>10352936.42</td>
+      <td>1977832.00</td>
+      <td>43276.54</td>
+      <td>conventionalconventionalconventionalconvention...</td>
+      <td>217620</td>
+      <td>AlbanyAtlantaBaltimoreWashingtonBoiseBostonBuf...</td>
+    </tr>
+    <tr>
+      <th>2015-01-18</th>
+      <td>150.24</td>
+      <td>78388784.08</td>
+      <td>31802706.86</td>
+      <td>31662041.93</td>
+      <td>2208250.55</td>
+      <td>12715784.74</td>
+      <td>10548854.11</td>
+      <td>2145586.13</td>
+      <td>21344.50</td>
+      <td>conventionalconventionalconventionalconvention...</td>
+      <td>217620</td>
+      <td>AlbanyAtlantaBaltimoreWashingtonBoiseBostonBuf...</td>
+    </tr>
+    <tr>
+      <th>2015-01-25</th>
+      <td>150.89</td>
+      <td>76466281.07</td>
+      <td>32305132.87</td>
+      <td>28929122.37</td>
+      <td>2078378.86</td>
+      <td>13153646.97</td>
+      <td>10877316.95</td>
+      <td>2252815.92</td>
+      <td>23514.10</td>
+      <td>conventionalconventionalconventionalconvention...</td>
+      <td>217620</td>
+      <td>AlbanyAtlantaBaltimoreWashingtonBoiseBostonBuf...</td>
+    </tr>
+    <tr>
+      <th>2015-02-01</th>
+      <td>134.68</td>
+      <td>119453235.25</td>
+      <td>50292988.96</td>
+      <td>50696230.48</td>
+      <td>3687489.31</td>
+      <td>14776526.50</td>
+      <td>11576833.65</td>
+      <td>3073989.39</td>
+      <td>125703.46</td>
+      <td>conventionalconventionalconventionalconvention...</td>
+      <td>217620</td>
+      <td>AlbanyAtlantaBaltimoreWashingtonBoiseBostonBuf...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Nuestro objetivo es predecir el precio promedio del aguacate utilizando un conjunto de datos que contiene información sobre las ventas y precios de este producto a lo largo del tiempo. El dataset incluye varias características relacionadas con las ventas de aguacates, y aquí te explico brevemente qué representa cada una:</p>
+<p>Date: La fecha de la observación, indicando cuándo se registraron los datos.
+AveragePrice: El precio promedio de un solo aguacate en esa fecha, que es la variable que queremos predecir.
+Total Volume: El volumen total de aguacates vendidos en esa fecha.
+4046, 4225, 4770: Son códigos PLU (Price Look-Up) que identifican diferentes tipos de aguacates, y cada columna muestra la cantidad vendida para esos códigos.
+Total Bags: El número total de bolsas de aguacates vendidas.
+Small Bags, Large Bags, XLarge Bags: La cantidad de bolsas vendidas, separadas por tamaño (pequeñas, grandes y extra grandes).
+Type: Indica si los aguacates son convencionales u orgánicos.
+Year: El año en que se realizó la observación.
+Region: La ciudad o región de la observación.
+El enfoque será utilizar la información histórica de estas variables para predecir el precio promedio del aguacate en fechas futuras. Esto es importante porque el precio del aguacate puede variar según factores como la temporada, la región y el tipo de aguacate (orgánico o convencional). Al utilizar modelos estadísticos, como SARIMA, podemos aprovechar patrones estacionales y de tendencia en los datos históricos para hacer estimaciones más precisas sobre los precios futuros.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dec</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">tsa</span><span class="o">.</span><span class="n">seasonal_decompose</span><span class="p">(</span><span class="n">df1</span><span class="p">[</span><span class="s1">&#39;AveragePrice&#39;</span><span class="p">],</span> <span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;multiplicative&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/1fcba38d350947f991e0e11f205a5a978a34f6a2a02b61fd18ee0b1117df3cb5.png" src="_images/1fcba38d350947f991e0e11f205a5a978a34f6a2a02b61fd18ee0b1117df3cb5.png" />
+</div>
+</div>
+<p>Al descomponer la serie de tiempo del precio promedio del aguacate, hemos identificado un patrón estacional claro. Esto significa que los precios muestran fluctuaciones predecibles en ciertos períodos del año, lo que puede ser atribuido a factores estacionales como cambios en la oferta, demanda o condiciones climáticas que afectan la producción de aguacates.</p>
+<p>Análisis de la Descomposición:
+Tendencia: Se observa una tendencia general en el tiempo, con aumentos y disminuciones en los precios promedio que sugieren un comportamiento a largo plazo.
+Estacionalidad: La descomposición reveló que los precios promedio tienden a aumentar o disminuir en ciertos momentos del año de manera consistente. Por ejemplo, podríamos ver que los precios son más altos durante ciertos meses en el año debido a la demanda estacional o la disponibilidad del producto.
+Ruido: También hay variaciones aleatorias que no se pueden atribuir ni a la tendencia ni a la estacionalidad, lo que representa el comportamiento errático del mercado.
+Justificación para el Modelo SARIMA:
+Dado que hemos identificado un patrón estacional en los datos, el uso de un modelo SARIMA (Seasonal AutoRegressive Integrated Moving Average) es apropiado. Este modelo es eficaz para capturar tanto las dinámicas estacionales como las no estacionales en la serie de tiempo.</p>
+<p>El modelo SARIMA tiene componentes que permiten:</p>
+<p>Diferenciación estacional: Para abordar la estacionalidad en los datos, asegurando que los patrones estacionales se modelen adecuadamente.
+Elementos autoregresivos y de medias móviles: Para capturar las dependencias en los datos a lo largo del tiempo, considerando la relación entre observaciones pasadas y presentes.
+Al implementar un modelo SARIMA, podemos mejorar nuestras predicciones del precio promedio del aguacate, aprovechando la información de patrones históricos y estacionales. Esto nos permitirá tomar decisiones más informadas en función de las tendencias esperadas en el mercado del aguacate.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_stationarity</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="c1">#Determing rolling statistics</span>
+    <span class="n">MA</span> <span class="o">=</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span> <span class="o">=</span> <span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">MSTD</span> <span class="o">=</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span> <span class="o">=</span> <span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+    <span class="c1">#Plot rolling statistics:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+    <span class="n">orig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Original&#39;</span><span class="p">)</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">MA</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Rolling Mean&#39;</span><span class="p">)</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">MSTD</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;Rolling Std&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Rolling Mean &amp; Standard Deviation&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1">#Perform Dickey-Fuller test:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Results of Dickey-Fuller Test:&#39;</span><span class="p">)</span>
+    <span class="n">dftest</span> <span class="o">=</span> <span class="n">adfuller</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">autolag</span><span class="o">=</span><span class="s1">&#39;AIC&#39;</span><span class="p">)</span>
+    <span class="n">dfoutput</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">dftest</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Test Statistic&#39;</span><span class="p">,</span><span class="s1">&#39;p-value&#39;</span><span class="p">,</span><span class="s1">&#39;#Lags Used&#39;</span><span class="p">,</span><span class="s1">&#39;Number of Observations Used&#39;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">dftest</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">dfoutput</span><span class="p">[</span><span class="s1">&#39;Critical Value (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="k">key</span>] = value
+    <span class="nb">print</span><span class="p">(</span><span class="n">dfoutput</span><span class="p">)</span>
+    
+<span class="k">def</span> <span class="nf">tsplot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;bmh&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        
+    <span class="k">with</span> <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">style</span><span class="p">):</span>    
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">ts_ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">acf_ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">pacf_ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        
+        <span class="n">y</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ts_ax</span><span class="p">)</span>
+        <span class="n">p_value</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">tsa</span><span class="o">.</span><span class="n">stattools</span><span class="o">.</span><span class="n">adfuller</span><span class="p">(</span><span class="n">y</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ts_ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Time Series Analysis Plots</span><span class="se">\n</span><span class="s1"> Dickey-Fuller: p=</span><span class="si">{0:.5f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p_value</span><span class="p">))</span>
+        <span class="n">smt</span><span class="o">.</span><span class="n">graphics</span><span class="o">.</span><span class="n">plot_acf</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="n">lags</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">acf_ax</span><span class="p">)</span>
+        <span class="n">smt</span><span class="o">.</span><span class="n">graphics</span><span class="o">.</span><span class="n">plot_pacf</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="n">lags</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">pacf_ax</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">test_stationarity</span><span class="p">(</span><span class="n">df1</span><span class="p">[</span><span class="s1">&#39;AveragePrice&#39;</span><span class="p">])</span>
+
+<span class="n">df1</span><span class="p">[</span><span class="s1">&#39;Log_AveragePrice&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">df1</span><span class="p">[</span><span class="s1">&#39;AveragePrice&#39;</span><span class="p">])</span>
+<span class="n">df1_log_diff</span> <span class="o">=</span> <span class="n">df1</span><span class="p">[</span><span class="s1">&#39;Log_AveragePrice&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
+<span class="n">df1_log_diff</span> <span class="o">=</span> <span class="n">df1_log_diff</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+<span class="n">dec</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">tsa</span><span class="o">.</span><span class="n">seasonal_decompose</span><span class="p">(</span><span class="n">df1_log_diff</span><span class="p">,</span><span class="n">period</span> <span class="o">=</span> <span class="mi">52</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/937efaf1a05e18ebcd895a50dbfd2e17f8cd3c458fb3481e5b4383fd8cd4c484.png" src="_images/937efaf1a05e18ebcd895a50dbfd2e17f8cd3c458fb3481e5b4383fd8cd4c484.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Results of Dickey-Fuller Test:
+Test Statistic                 -2.36
+p-value                         0.15
+#Lags Used                      0.00
+Number of Observations Used   168.00
+Critical Value (1%)            -3.47
+Critical Value (5%)            -2.88
+Critical Value (10%)           -2.58
+dtype: float64
+</pre></div>
+</div>
+<img alt="_images/7a5e6cbe44f693e96f76de8841f979a188e2f0e1e599e18eb7b4643c6352fd11.png" src="_images/7a5e6cbe44f693e96f76de8841f979a188e2f0e1e599e18eb7b4643c6352fd11.png" />
+</div>
+</div>
+<p>Al revisar los resultados de la prueba de Dickey-Fuller, hemos encontrado que nuestra serie de tiempo no presenta estacionariedad. Esto es un aspecto crítico en el análisis de series temporales, ya que un modelo SARIMA requiere que los datos sean estacionarios para ofrecer predicciones precisas.</p>
+<p>Implicaciones de la No Estacionariedad:
+Tendencia y Estacionalidad: La falta de estacionariedad indica que los datos exhiben tendencias o patrones que cambian con el tiempo, lo que puede dificultar la identificación de relaciones y la modelización adecuada de la serie.
+Dependencia del Tiempo: Esto sugiere que las características de la serie temporal, como la media y la varianza, no son constantes a lo largo del tiempo.
+Estrategia para Lograr la Estacionariedad:
+Para abordar esta falta de estacionariedad, realizaremos una diferenciación de primer orden. Esto implica calcular la diferencia entre los valores actuales y los valores anteriores de la serie de tiempo, lo que puede ayudar a eliminar tendencias y estabilizar la media de la serie.</p>
+<p>Este proceso se lleva a cabo de la siguiente manera:</p>
+<p>Diferenciación: Al aplicar la diferencia de primer orden, transformaremos nuestra serie de tiempo original en una nueva serie que idealmente debería ser estacionaria. Esto permitirá que el modelo SARIMA sea más adecuado y efectivo al capturar las dinámicas del precio promedio del aguacate.
+Con esta transformación, estaremos en una mejor posición para ajustar nuestro modelo SARIMA y realizar predicciones más precisas sobre el comportamiento futuro de los precios del aguacate.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">test_stationarity</span><span class="p">(</span><span class="n">df1_log_diff</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/461af5482bdc6a68a9da80aa90383eebd90431da887fd612f584e24ce236c6e5.png" src="_images/461af5482bdc6a68a9da80aa90383eebd90431da887fd612f584e24ce236c6e5.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Results of Dickey-Fuller Test:
+Test Statistic                -13.82
+p-value                         0.00
+#Lags Used                      0.00
+Number of Observations Used   167.00
+Critical Value (1%)            -3.47
+Critical Value (5%)            -2.88
+Critical Value (10%)           -2.58
+dtype: float64
+</pre></div>
+</div>
+</div>
+</div>
+<p>Después de aplicar la diferenciación de primer orden a nuestra serie de tiempo, realizamos nuevamente la prueba de Dickey-Fuller para evaluar la estacionariedad de los datos transformados. Los resultados obtenidos de esta segunda prueba confirmaron que ahora la serie presenta las características deseadas de estacionariedad.</p>
+<p>Resultados Positivos:
+La prueba de Dickey-Fuller mostró que la serie de tiempo diferenciada tiene una media y varianza constantes a lo largo del tiempo, lo que indica que hemos eliminado las tendencias y patrones no estacionarios presentes en la serie original.
+Con esta transformación exitosa, los resultados del test indican que podemos proceder con confianza al ajuste de un modelo SARIMA, ya que la serie ahora cumple con uno de los supuestos fundamentales requeridos para este tipo de modelización.
+Este logro es un paso crucial en nuestro análisis, ya que una serie estacionaria nos permitirá realizar predicciones más precisas sobre el precio promedio del aguacate en el futuro, utilizando la información histórica y los patrones estacionales que hemos identificado.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tsplot</span><span class="p">(</span><span class="n">df1</span><span class="p">[</span><span class="s1">&#39;AveragePrice&#39;</span><span class="p">],</span><span class="n">lags</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="n">tsplot</span><span class="p">(</span><span class="n">df1_log_diff</span><span class="p">,</span><span class="n">lags</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/35c609369903350d80fbc23072318276f6b4add531048548210b24b9f2e104f6.png" src="_images/35c609369903350d80fbc23072318276f6b4add531048548210b24b9f2e104f6.png" />
+<img alt="_images/68b163adced4422ffbb929822085711213eda2405fa13686df540ba0f5bab37c.png" src="_images/68b163adced4422ffbb929822085711213eda2405fa13686df540ba0f5bab37c.png" />
+</div>
+</div>
+<p>Después de probar varios modelos de predicción, hemos seleccionado el siguiente modelo como el más adecuado para nuestros datos: ARIMA(1,1,0)(1,1,0)[52]. Este modelo fue elegido debido a su rendimiento óptimo en términos de ajuste a los datos y su capacidad para capturar tanto las dinámicas estacionales como las no estacionales de la serie de tiempo del precio promedio del aguacate.</p>
+<p>Resultados del Modelo Seleccionado:
+Número de Observaciones: 168
+Log Likelihood: 164.227
+AIC: -322.454
+BIC: -314.220
+Tiempo Total de Ajuste: 205.077 segundos</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">statsmodels.tsa.statespace.sarimax</span> <span class="kn">import</span> <span class="n">SARIMAX</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
+
+<span class="c1"># Supongamos que df1 ya contiene la serie de tiempo</span>
+<span class="c1"># Dividir los datos en entrenamiento y prueba</span>
+<span class="n">train_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">)</span>  <span class="c1"># 80% para entrenamiento</span>
+<span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">df1</span><span class="p">[</span><span class="s1">&#39;AveragePrice&#39;</span><span class="p">][:</span><span class="n">train_size</span><span class="p">],</span> <span class="n">df1</span><span class="p">[</span><span class="s1">&#39;AveragePrice&#39;</span><span class="p">][</span><span class="n">train_size</span><span class="p">:]</span>
+
+<span class="c1"># Ajustar el modelo SARIMA</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">SARIMAX</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">seasonal_order</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">52</span><span class="p">))</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+<span class="c1"># Realizar predicciones en el conjunto de prueba</span>
+<span class="n">pred</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get_forecast</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span>
+<span class="n">pred_conf</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">conf_int</span><span class="p">()</span>
+
+<span class="c1"># Calcular el error cuadrático medio</span>
+<span class="n">mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">pred</span><span class="o">.</span><span class="n">predicted_mean</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean Squared Error: </span><span class="si">{</span><span class="n">mse</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># Graficar la serie de tiempo, las predicciones y el conjunto de prueba</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df1</span><span class="p">[</span><span class="s1">&#39;AveragePrice&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Precio Promedio&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pred</span><span class="o">.</span><span class="n">predicted_mean</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pred</span><span class="o">.</span><span class="n">predicted_mean</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Predicción SARIMA&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">pred_conf</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pred_conf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pred_conf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;pink&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Conjunto de Prueba&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">)</span>
+
+<span class="c1"># Configuraciones de la gráfica</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Predicción de Precio Promedio de Aguacate con SARIMA&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Fecha&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Precio Promedio&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Mean Squared Error: 280.687777151872
+</pre></div>
+</div>
+<img alt="_images/d791bfced97e518356d763b1f10b630320b7be49091056b5bb20fe4000a3e766.png" src="_images/d791bfced97e518356d763b1f10b630320b7be49091056b5bb20fe4000a3e766.png" />
+</div>
+</div>
+<p>En nuestro estudio, decidimos desarrollar un modelo SARIMA (Seasonal Autoregressive Integrated Moving Average) para predecir el precio promedio del aguacate, basándonos en las características de la serie de tiempo de nuestros datos. La elección del modelo SARIMA se justificó por varias razones que aseguran su idoneidad para el análisis de los precios de exportación del aguacate.</p>
+<p>En primer lugar, observamos que la serie de tiempo presentaba patrones estacionales evidentes, lo que indica que el precio del aguacate no solo es influenciado por tendencias a largo plazo, sino también por fluctuaciones estacionales que pueden repetirse anualmente. Por lo tanto, un modelo que pudiera capturar tanto la autoregresión como los efectos estacionales resultó ser esencial para obtener predicciones más precisas.</p>
+<p>Además, el modelo SARIMA permite trabajar con datos no estacionarios, ya que incorpora el proceso de diferenciación, lo cual es fundamental cuando los datos muestran una tendencia o patrones que cambian con el tiempo. A través de la diferenciación de primer orden, logramos estabilizar la serie y cumplir con el requisito de estacionariedad, lo que es crucial para la validez de los resultados del modelo.</p>
+<p>La metodología de selección de parámetros en el modelo SARIMA se basó en el análisis de las funciones de autocorrelación (ACF) y autocorrelación parcial (PACF), así como en criterios de selección como el Criterio de Información de Akaike (AIC). Estos pasos garantizaron que el modelo fuera no solo adecuado, sino también parsimonioso, es decir, que utilizara la menor cantidad de parámetros posible sin sacrificar la calidad del ajuste.</p>
+<p>En resumen, la elección del modelo SARIMA fue impulsada por la necesidad de capturar tanto las dinámicas estacionales como las tendencias subyacentes en los precios del aguacate. Su flexibilidad para manejar datos no estacionarios y su capacidad para realizar pronósticos más precisos hacen de este modelo una herramienta eficaz en nuestro análisis de precios de exportación, permitiéndonos ofrecer una perspectiva más clara sobre las tendencias futuras del mercado.</p>
+<p>Aguilar, B. A., &amp; Acosta Abreu, R. S. (Año). Ajuste de un modelo ARIMA para los precios de exportación del aguacate calibre 60. Licenciatura en Física y Matemáticas, ESFM-IPN, México D.F., México.</p>
+<p>El estudio realizado por Belem A. Aguilar y Roberto S. Acosta Abreu se centra en la dinámica de los precios de exportación del aguacate calibre 60 hacia Estados Unidos, un mercado clave para este producto que ha visto un incremento significativo en la demanda en los últimos años. Este crecimiento ha provocado no solo un aumento en las ventas, sino también fluctuaciones notables en los precios de exportación, lo que requiere una comprensión profunda de los factores que influyen en estas variaciones. Para abordar este desafío, se eligió un modelo ARIMA (Autoregressive Integrated Moving Average), ampliamente reconocido en el análisis de series de tiempo, especialmente útil para datos que muestran patrones no estacionarios y estacionales.</p>
+<p>La elección del modelo ARIMA se basa en varios criterios que aseguran su idoneidad para el análisis de precios de exportación del aguacate. En primer lugar, se buscó un modelo que proporcionara un ajuste adecuado a la serie de tiempo, considerando diferentes modelos que cumplieran con esta característica. Además, se utilizó el método de Estimación de Máxima Verisimilitud (ML), que es efectivo para series de longitud moderada y modelos estocásticos estacionales, alineándose con las características de los datos analizados. El Criterio de Información de Akaike (AIC) se aplicó para seleccionar el modelo, eligiendo aquel que minimizara la divergencia Kullback-Leibler entre el modelo estimado y el modelo real, lo que proporciona una medida rigurosa de la calidad del ajuste.</p>
+<p>Asimismo, se priorizó la simplicidad y efectividad del modelo, buscando un ajuste que utilizara el menor número posible de coeficientes. Es crucial que el modelo elegido sea estacionario e invertible, asegurando que los resultados sean fiables para la predicción futura. También se identificaron patrones estacionales en los precios, lo que llevó a considerar un modelo que pudiera manejar adecuadamente estos efectos. Para evaluar la adecuación del modelo y su capacidad para capturar las dinámicas de la serie de tiempo, se realizaron análisis gráficos, como ACF y PACF. A pesar de algunas variaciones en la varianza, el modelo final demostró ser práctico y adecuado, con predicciones razonables en los intervalos de confianza.</p>
+<p>En conclusión, el modelo ARIMA seleccionado, con sus capacidades para ajustarse a los datos observados y su eficacia en la estimación de parámetros, representa una herramienta adecuada para el análisis de precios de exportación. La metodología Box-Jenkins proporciona un marco robusto para la identificación y selección del modelo más apropiado, asegurando que se cumplan los requisitos estadísticos necesarios para obtener resultados confiables. Esto no solo beneficia a los productores y exportadores de aguacate, sino que también contribuye a una comprensión más profunda de la dinámica del mercado agrícola en un contexto global.</p>
 <p>There is a lot more that you can do with outputs (such as including interactive outputs)
 with your book. For more information about this, see <a class="reference external" href="https://jupyterbook.org">the Jupyter Book documentation</a></p>
 </section>
