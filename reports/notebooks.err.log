@@ -30,8 +30,8 @@ nbclient.exceptions.CellTimeoutError: A cell timed out while it was being execut
 The message was: Cell execution timed out.
 Here is a preview of the cell contents:
 -------------------
-['import seaborn as sns', 'import matplotlib.pyplot as plt', '', '# Diferencias con diferentes lags', "df['Price_diff_1'] = df['Price'].diff(1)  # Lag de 1 día"]
+['import seaborn as sns', '', '# Lista de variables (At y volatilidades)', "variables = ['At', 'Volatilidad_7', 'Volatilidad_14', 'Volatilidad_21', 'Volatilidad_28']", "colors = ['blue', 'green', 'orange', 'red', 'purple']"]
 ...
-["plt.xlabel('Diferencias de Precio')", "plt.ylabel('Frecuencia')", 'plt.ylim(0, 1100)  # Ajustar el eje Y a un máximo de 1100', 'plt.legend()', 'plt.show()']
+["    plt.title(f'Distribución de Frecuencias para Diferentes Lags - {var}')", "    plt.xlabel(f'Diferencias de {var}')", "    plt.ylabel('Frecuencia')", '    plt.legend()', '    plt.show()']
 -------------------
 
